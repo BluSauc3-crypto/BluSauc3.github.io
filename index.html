@@ -359,7 +359,7 @@
             const duration = getRandomDuration();
 
             const trackHTML = `
-                <div class="track-row group flex items-center p-3 sm:px-4 sm:py-3 rounded-lg hover:bg-gray-800/80 transition-colors cursor-pointer border border-transparent hover:border-gray-700" data-track="${track}">
+                <div class="track-row group flex items-center p-3 sm:px-4 sm:py-3 rounded-lg hover:bg-gray-800/80 transition-colors cursor-pointer border border-transparent hover:border-gray-700" data-track="${track}" data-url="${spotifyLinks[track] || ''}">
                     <div class="w-12 text-gray-500 font-mono text-sm group-hover:text-brand-blue">
                         <span class="block group-hover:hidden">${num}</span>
                         <i class="fas fa-play hidden group-hover:block text-brand-blue text-xs ml-1 mt-1"></i>
@@ -382,7 +382,14 @@
         // through Spotify, so the spin pays through distribution.
         const playerBar = document.createElement('div');
         playerBar.id = 'spotify-player';
-        playerBar.className = 'fixed bottom-0 left-0 right-0 z-50 hidden bg-black/95 backdrop-blur border-t border-gray-800 px-3 py-2';
+        playerBar.className = 'fixed bottom-0 left-0 right-0 z-50 bg-black/95 backdrop-blur border-t border-gray-800 px-3 py-2';
+        playerBar.style.display = 'none';
+        playerBar.style.position = 'fixed';
+        playerBar.style.bottom = '0';
+        playerBar.style.left = '0';
+        playerBar.style.right = '0';
+        playerBar.style.zIndex = '9999';
+        playerBar.style.background = 'rgba(0,0,0,0.97)';
         playerBar.innerHTML = `
             <div class="max-w-5xl mx-auto flex items-center gap-3">
                 <div class="min-w-0">
@@ -398,16 +405,23 @@
         const spTitle = document.getElementById('sp-title');
         const spOpen = document.getElementById('sp-open');
 
+        function playTrack(track) {
+            const url = spotifyLinks[track];
+            if (!url) return;
+            spTitle.textContent = track;
+            spOpen.href = url;
+            spFrame.src = embedUrl(url);
+            playerBar.style.display = 'block';
+        }
+
         document.querySelectorAll('.track-row').forEach(row => {
-            row.addEventListener('click', () => {
-                const track = row.getAttribute('data-track');
-                const url = spotifyLinks[track];
-                if (!url) return;
-                spTitle.textContent = track;
-                spOpen.href = url;
-                spFrame.src = embedUrl(url);
-                playerBar.classList.remove('hidden');
-            });
+            row.addEventListener('click', () => playTrack(row.getAttribute('data-track')));
+        });
+
+        // Delegated backup: any click inside the tracklist plays that song.
+        tracklistContainer.addEventListener('click', (e) => {
+            const row = e.target.closest('.track-row');
+            if (row) playTrack(row.getAttribute('data-track'));
         });
 
         // Navbar scroll effect
