@@ -306,14 +306,45 @@
 
         // Tracklist Data
         const tracks = [
-            'Upper Hand', 'Easy Peezy Lemon Squeezy', 'May Not Approve', 'Lit', 
-            'Collosal Cap', 'Thinking Bout You', 'Already Mine', 'Can\'t Touch This', 
-            'Loyalty', 'Breaker 19', 'About It', 'Dolphin', 'Gifted', 
-            'Money In The Way', 'Stepping', 'Blue Pill', 'Back At It', 'Smoke', 
+            'Upper Hand', 'Easy Peezy Lemon Squeezy', 'May Not Approve', 'Lit',
+            'Collosal Cap', 'Thinking Bout You', 'Already Mine', 'Can\'t Touch This',
+            'Loyalty', 'Breaker 19', 'About It', 'Dolphin', 'Gifted',
+            'Money In The Way', 'Stepping', 'Blue Pill', 'Back At It', 'Smoke',
             'Saint You Ain\'t', 'L.A.T.T.', 'Net Worth', 'Okay'
         ];
 
-        // Generate Random Duration for visual completeness
+        // Official Spotify links (via BandLab distribution). Clicking a song
+        // plays it through Spotify, so every play counts as a paid spin.
+        const spotifyLinks = {
+        "Upper Hand": "https://open.spotify.com/track/0n2YbMbeDHOvWyuPUo3snz",
+        "Easy Peezy Lemon Squeezy": "https://open.spotify.com/track/2pGJSFzWp5Uhggite9wZYw",
+        "May Not Approve": "https://open.spotify.com/track/4OMcGaEhy9yr3zvhpE1eEm",
+        "Lit": "https://open.spotify.com/track/2Aktabv9j4mZo01zyrSpXC",
+        "Collosal Cap": "https://open.spotify.com/track/1rglrL8lwEnRcVHwZVgwSy",
+        "Thinking Bout You": "https://open.spotify.com/track/7Jt8bnEXfVH1OXGjJYyBZo",
+        "Already Mine": "https://open.spotify.com/track/2jeinjdryjKo4YhIQtD4Ub",
+        "Can't Touch This": "https://open.spotify.com/track/0S1L4hFa3rzt5AeJ1icGep",
+        "Loyalty": "https://open.spotify.com/track/4FJurO4pylbweq7oVRaCdC",
+        "Breaker 19": "https://open.spotify.com/track/17ESIsjzmaGkIfbhmx0NJ6",
+        "About It": "https://open.spotify.com/track/78nvjjnpHSgXATGzfLefub",
+        "Dolphin": "https://open.spotify.com/track/3dOdggaVJBZtasV0xVbQDJ",
+        "Gifted": "https://open.spotify.com/track/24pWdKbV3jF8YJB26ADWhz",
+        "Money In The Way": "https://open.spotify.com/track/1JNqcZWhDlFHjDTiZ86hRe",
+        "Stepping": "https://open.spotify.com/track/4Dq2UE1eQ8Lo8MrPYjfaFm",
+        "Blue Pill": "https://open.spotify.com/track/4AwO0XPnkdZBP5DHhIZs8t",
+        "Back At It": "https://open.spotify.com/track/5Fj9RyQs8K8Ewxg2RpdGjh",
+        "Smoke": "https://open.spotify.com/track/7jdjPSF5qmj1H3pNqzPDs3",
+        "Saint You Ain't": "https://open.spotify.com/track/4cFEGhoafEi7OPWZIj7g8w",
+        "L.A.T.T.": "https://open.spotify.com/track/0BspLmSg2XFe01FG5gAQOc",
+        "Net Worth": "https://open.spotify.com/track/10W9JKMCMc0LLB4rKbwsy3",
+        "Okay": "https://open.spotify.com/track/5teHZpav61c3XxX4sL4X7p"
+};
+
+        function embedUrl(trackUrl) {
+            const id = trackUrl.split('/track/')[1].split('?')[0];
+            return 'https://open.spotify.com/embed/track/' + id + '?utm_source=generator&theme=0';
+        }
+
         function getRandomDuration() {
             const min = 2;
             const max = 4;
@@ -321,15 +352,14 @@
             return `${Math.floor(Math.random() * (max - min + 1) + min)}:${sec < 10 ? '0' : ''}${sec}`;
         }
 
-        // Render Tracklist
         const tracklistContainer = document.getElementById('tracklist');
-        
+
         tracks.forEach((track, index) => {
             const num = (index + 1).toString().padStart(2, '0');
             const duration = getRandomDuration();
-            
+
             const trackHTML = `
-                <div class="group flex items-center p-3 sm:px-4 sm:py-3 rounded-lg hover:bg-gray-800/80 transition-colors cursor-pointer border border-transparent hover:border-gray-700">
+                <div class="track-row group flex items-center p-3 sm:px-4 sm:py-3 rounded-lg hover:bg-gray-800/80 transition-colors cursor-pointer border border-transparent hover:border-gray-700" data-track="${track}">
                     <div class="w-12 text-gray-500 font-mono text-sm group-hover:text-brand-blue">
                         <span class="block group-hover:hidden">${num}</span>
                         <i class="fas fa-play hidden group-hover:block text-brand-blue text-xs ml-1 mt-1"></i>
@@ -338,7 +368,7 @@
                         <h4 class="text-white font-medium text-sm sm:text-base group-hover:text-brand-blue transition-colors">${track}</h4>
                     </div>
                     <div class="hidden sm:block w-32 text-right">
-                        <span class="inline-block px-2 py-1 bg-gray-900 rounded text-xs text-gray-400">Available</span>
+                        <span class="inline-block px-2 py-1 bg-gray-900 rounded text-xs text-green-400">&#9654; Spotify</span>
                     </div>
                     <div class="w-16 text-right text-sm text-gray-500 font-mono">
                         ${duration}
@@ -346,6 +376,38 @@
                 </div>
             `;
             tracklistContainer.insertAdjacentHTML('beforeend', trackHTML);
+        });
+
+        // Spotify player bar: clicking any song loads it here and plays it
+        // through Spotify, so the spin pays through distribution.
+        const playerBar = document.createElement('div');
+        playerBar.id = 'spotify-player';
+        playerBar.className = 'fixed bottom-0 left-0 right-0 z-50 hidden bg-black/95 backdrop-blur border-t border-gray-800 px-3 py-2';
+        playerBar.innerHTML = `
+            <div class="max-w-5xl mx-auto flex items-center gap-3">
+                <div class="min-w-0">
+                    <div id="sp-title" class="text-white font-bold text-sm truncate">Money In The Way</div>
+                    <div class="text-gray-400 text-xs">Blu Sauc3 &middot; Spotify</div>
+                </div>
+                <iframe id="sp-frame" title="Spotify player" class="flex-1" style="border-radius:12px" height="80" frameborder="0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+                <a id="sp-open" href="#" target="_blank" rel="noopener" class="text-green-400 text-xs font-bold whitespace-nowrap">Open in<br>Spotify</a>
+            </div>`;
+        document.body.appendChild(playerBar);
+
+        const spFrame = document.getElementById('sp-frame');
+        const spTitle = document.getElementById('sp-title');
+        const spOpen = document.getElementById('sp-open');
+
+        document.querySelectorAll('.track-row').forEach(row => {
+            row.addEventListener('click', () => {
+                const track = row.getAttribute('data-track');
+                const url = spotifyLinks[track];
+                if (!url) return;
+                spTitle.textContent = track;
+                spOpen.href = url;
+                spFrame.src = embedUrl(url);
+                playerBar.classList.remove('hidden');
+            });
         });
 
         // Navbar scroll effect
